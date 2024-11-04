@@ -48,43 +48,43 @@ public class Monster extends Entity {
 	}
 
 	/**
-	 * Approach the player or attack if possible. Returns 0 was blocked, 1 if I
-	 * attacked, or 2 if I moved.
+	 * Approach the player or attack if possible. Returns -1 if I was blocked, 0 if I
+	 * attacked, or 1 if I moved.
 	 */
-	public int advance(Player player) {
+	public int advance() {
 		List<Direction> dirs = new ArrayList<>();
-		if (player.getX() < this.x) {
+		if (Game.getPlayer().getX() < this.x) {
 			char at = this.room.getMapAt(this.x - 1, this.y);
 			if (at == Room.PLAYER_CHAR) {
-				player.chgHP(-this.type.atk);
+				Game.getPlayer().chgHP(-this.type.atk);
 				return 0;
 			}
 			if (at == Room.EMPTY_CHAR) {
 				dirs.add(Direction.LEFT);
 			}
-		} else if (player.getX() > this.x) {
+		} else if (Game.getPlayer().getX() > this.x) {
 			char at = this.room.getMapAt(this.x + 1, this.y);
 			if (at == Room.PLAYER_CHAR) {
-				player.chgHP(-this.type.atk);
+				Game.getPlayer().chgHP(-this.type.atk);
 				return 0;
 			}
 			if (at == Room.EMPTY_CHAR) {
 				dirs.add(Direction.RIGHT);
 			}
 		}
-		if (player.getY() < this.y) {
+		if (Game.getPlayer().getY() < this.y) {
 			char at = this.room.getMapAt(this.x, this.y - 1);
 			if (at == Room.PLAYER_CHAR) {
-				player.chgHP(-this.type.atk);
+				Game.getPlayer().chgHP(-this.type.atk);
 				return 0;
 			}
 			if (at == Room.EMPTY_CHAR) {
 				dirs.add(Direction.UP);
 			}
-		} else if (player.getY() > this.y) {
+		} else if (Game.getPlayer().getY() > this.y) {
 			char at = this.room.getMapAt(this.x, this.y + 1);
 			if (at == Room.PLAYER_CHAR) {
-				player.chgHP(-this.type.atk);
+				Game.getPlayer().chgHP(-this.type.atk);
 				return 0;
 			}
 			if (at == Room.EMPTY_CHAR) {

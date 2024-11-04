@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Room {
-	public static final char PLAYER_CHAR = '@';
-	public static final char EMPTY_CHAR = '.';
+	public static final char EMPTY_CHAR = ' ';
 	public static final char WALL_CHAR = '=';
 	protected StringBuilder map;
 	protected List<Monster> monsters;
@@ -44,7 +43,7 @@ public class Room {
 		this.map.setCharAt((y + 1) * (this.width + 3) + x + 1, ch);
 	}
 
-	public void tick(Player player) {
+	public void tick() {
 		Set<Monster> trying = new HashSet<Monster>(monsters);
 		boolean chg;
 		do {
