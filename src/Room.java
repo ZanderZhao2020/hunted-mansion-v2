@@ -5,42 +5,41 @@ import java.util.List;
 import java.util.Set;
 
 public class Room {
-	public static final char EMPTY_CHAR = ' ';
-	public static final char WALL_CHAR = '=';
-	protected StringBuilder map;
+	protected Entity[][] map;
 	protected List<Monster> monsters;
 	protected int width, height;
 
 	public Room(int width, int height) {
 		this.width = width;
 		this.height = height;
-		this.map = new StringBuilder();
+		this.map = new Entity[height][width];
 		this.monsters = new ArrayList<>();
-		for (int x = 0; x < width + 2; x++) {
-			this.map.append(Room.WALL_CHAR);
-		}
-		this.map.append('\n');
-		for (int y = 0; y < height; y++) {
-			this.map.append(Room.WALL_CHAR);
-			for (int x = 0; x < width; x++) {
-				this.map.append(Room.EMPTY_CHAR);
+		for (int i = 1; i <= 3; i++) {
+			for (int o = 1; o <= 3; o++) {
+				this.monsters.add(new Monster(width - i, height - o, this, Entity.Type.ZOMBIE));
 			}
-			this.map.append(Room.WALL_CHAR);
-			this.map.append('\n');
 		}
-		for (int x = 0; x < width + 2; x++) {
-			this.map.append(Room.WALL_CHAR);
-		}
-		this.map.append('\n');
-		this.monsters.add(new Monster(width - 1, height - 1, this, Monster.Type.ZOMBIE));
 	}
 
-	public char getMapAt(int x, int y) {
-		return this.map.charAt((y + 1) * (this.width + 3) + x + 1);
+	public int getWidth() {
+		return this.width;
 	}
-	
-	public void setMapAt(int x, int y, char ch) {
-		this.map.setCharAt((y + 1) * (this.width + 3) + x + 1, ch);
+
+	public int getHeight() {
+		return this.height;
+	}
+
+	public Entity getEntAt(int x, int y) {
+		return this.map[y][x];
+	}
+
+	public void setEntAt(int x, int y, Entity ent) {
+		this.map[y][x] = ent;
+	}
+
+	public void removeMonster(Monster monster) {
+		this.map[monster.getY()][monster.getX()] = null;
+		this.monsters.remove(monster);
 	}
 
 	public void tick() {
@@ -51,19 +50,35 @@ public class Room {
 			Iterator<Monster> it = trying.iterator();
 			while (it.hasNext()) {
 				Monster next = it.next();
-				int advanced = next.advance(player);
-				if (advanced >= 0) {
+				AdvanceStatus stat = next.advance();
+				if (stat != AdvanceStatus.BLOCKED) {
 					it.remove();
 				}
-				if (advanced == 1) {
+				if (stat == AdvanceStatus.MOVED) {
 					chg = true;
 				}
 			}
 		} while (chg);
 	}
-	
+
 	@Override
 	public String toString() {
-		return this.map.toString();
+		StringBuilder ans = new StringBuilder();
+		for (int x = 0; x < width + 2; x++) {
+			ans.append('=');
+		}
+		ans.append('\n');
+		for (int y = 0; y < height; y++) {
+			ans.append('=');
+			for (int x = 0; x < width; x++) {
+				ans.append(this.map[y][x] == null ? ' ' : this.map[y][x].getType().getMapChar());
+			}
+			ans.append("=\n");
+		}
+		for (int x = 0; x < width + 2; x++) {
+			ans.append('=');
+		}
+		ans.append('\n');
+		return ans.toString();
 	}
 }
