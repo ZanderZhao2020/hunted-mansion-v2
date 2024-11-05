@@ -5,60 +5,65 @@ import java.util.List;
 import java.util.Set;
 
 public class Room {
-	protected Entity[][] map;
-	protected List<Monster> monsters;
-	protected int width, height;
+	public Item[][] items;
+	public Entity[][] ents;
+	public List<Monster> monsters;
+	public int width, height;
+	public int difficulty;
 
-	public Room(int width, int height) {
+	public Room(int width, int height, int difficulty) {
 		this.width = width;
 		this.height = height;
-		this.map = new Entity[height][width];
+		this.items = new Item[height][width];
+		this.ents = new Entity[height][width];
 		this.monsters = new ArrayList<>();
-		for (int i = 1; i <= 3; i++) {
-			for (int o = 1; o <= 3; o++) {
-				this.monsters.add(new Monster(width - i, height - o, this, Entity.Type.ZOMBIE));
+		this.difficulty = difficulty;
+	}
+
+	public void populate() {
+		int itemsWanted = (int) (Math.random() * 3);
+		int itemsAdded = 0;
+		do {
+			int x = (int) (Math.random() * width);
+			int y = (int) (Math.random() * height);
+			if (items[y][x] == null) {
+				items[y][x] = new Item(Item.Type.HEAL_POTION);
+				itemsAdded++;
 			}
-		}
+		} while (itemsAdded < itemsWanted);
+		int monstersAdded = 0;
+		do {
+			int x = (int) (Math.random() * width);
+			int y = (int) (Math.random() * height);
+			if (ents[y][x] == null) {
+				System.out.println("added monster");
+				this.monsters.add(new Monster(x, y, this, Entity.Type.ZOMBIE));
+				monstersAdded++;
+			}
+		} while (monstersAdded < difficulty);
 	}
 
-	public int getWidth() {
-		return this.width;
-	}
-
-	public int getHeight() {
-		return this.height;
-	}
-
-	public Entity getEntAt(int x, int y) {
-		return this.map[y][x];
-	}
-
-	public void setEntAt(int x, int y, Entity ent) {
-		this.map[y][x] = ent;
-	}
-
-	public void removeMonster(Monster monster) {
-		this.map[monster.getY()][monster.getX()] = null;
-		this.monsters.remove(monster);
-	}
-
-	public void tick() {
+	public int tick() {
 		Set<Monster> trying = new HashSet<Monster>(monsters);
 		boolean chg;
+		int ans = 0;
 		do {
 			chg = false;
 			Iterator<Monster> it = trying.iterator();
 			while (it.hasNext()) {
 				Monster next = it.next();
-				AdvanceStatus stat = next.advance();
-				if (stat != AdvanceStatus.BLOCKED) {
+				int ret = next.advance();
+				if (ret >= 0) {
 					it.remove();
-				}
-				if (stat == AdvanceStatus.MOVED) {
-					chg = true;
+					if (ret == 0) {
+						chg = true;
+					} else {
+						ans += ret;
+					}
 				}
 			}
 		} while (chg);
+		return ans;
 	}
 
 	@Override
@@ -71,7 +76,7 @@ public class Room {
 		for (int y = 0; y < height; y++) {
 			ans.append('=');
 			for (int x = 0; x < width; x++) {
-				ans.append(this.map[y][x] == null ? ' ' : this.map[y][x].getType().getMapChar());
+				ans.append(this.ents[y][x] == null ? (this.items[y][x] == null ? ' ' : 'I') : this.ents[y][x].type.mapChar);
 			}
 			ans.append("=\n");
 		}

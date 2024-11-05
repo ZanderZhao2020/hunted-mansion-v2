@@ -1,14 +1,12 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class Entity {
-	public enum Type {
-		ZOMBIE("Zombie", 100, 5, 'Z'), PLAYER("Player", 100, 80, '@');
+	public static enum Type {
+		ZOMBIE("Zombie", 100, 5, 'Z'),
+		PLAYER("Player", 100, 80, '@');
 
-		protected String name;
-		protected int startHP;
-		protected int atk;
-		protected char mapChar;
+		public String name;
+		public int startHP;
+		public int atk;
+		public char mapChar;
 
 		private Type(String name, int startHP, int atk, char mapChar) {
 			this.name = name;
@@ -16,57 +14,23 @@ public abstract class Entity {
 			this.atk = atk;
 			this.mapChar = mapChar;
 		}
-
-		public String getName() {
-			return this.name;
-		}
-
-		public int getStartHP() {
-			return this.startHP;
-		}
-
-		public int getAtk() {
-			return this.atk;
-		}
-
-		public char getMapChar() {
-			return this.mapChar;
-		}
 	}
 
-	protected Type type;
-	protected int x, y;
-	protected Room room;
-	protected List<Item> inv;
-	protected int hp;
+	public Type type;
+	public int x, y;
+	public Room room;
+	public Item wpn;
+	public int hp;
 
-	public Entity(int x, int y, Room room) {
+	public Entity(int x, int y, Room room, Type type) {
 		this.x = x;
 		this.y = y;
 		this.room = room;
-		this.inv = new ArrayList<Item>();
-		this.room.setEntAt(this.x, this.y, this);
+		this.type = type;
+		this.hp = type.startHP;
+		this.room.ents[this.y][this.x] = this;
 	}
 
-	public Type getType() {
-		return this.type;
-	}
-
-	public int getX() {
-		return this.x;
-	}
-
-	public int getY() {
-		return this.y;
-	}
-
-	public int getHP() {
-		return this.hp;
-	}
-
-	/**
-	 * Returns true if I died, false otherwise.
-	 */
 	public void chgHP(int amt) {
 		this.hp += amt;
 		if (this.hp > 100) {
@@ -75,9 +39,9 @@ public abstract class Entity {
 	}
 
 	public void go(int x, int y) {
-		this.room.setEntAt(this.x, this.y, null);
+		this.room.ents[this.y][this.x] = null;
 		this.x = x;
 		this.y = y;
-		this.room.setEntAt(x, y, this);
+		this.room.ents[this.y][this.x] = this;
 	}
 }

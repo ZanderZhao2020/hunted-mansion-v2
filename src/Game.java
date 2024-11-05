@@ -1,23 +1,17 @@
 import java.util.Scanner;
 
 public class Game {
-	private static Player player;
-
-	public static Player getPlayer() {
-		return Game.player;
-	}
+	public static Player player;
 
 	public static void main(String[] args) {
-		Room room = new Room(10, 10);
-		Game.player = new Player(0, 0, room);
+		Room room = new Room(10, 10, 1);
+		player = new Player(0, 0, room);
+		room.populate();
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		String msg = "Welcome to the Table 1 Hunted Mansion. Press i and enter for help.\n";
 		room.tick();
 		while (true) {
-			for (int i = 0; i < 50; i++) {
-				System.out.println();
-			}
 			System.out.print(room);
 			System.out.print(msg);
 			String cmd = scanner.nextLine();
@@ -25,40 +19,49 @@ public class Game {
 				msg = "Invalid instruction. Press i and enter for help.\n";
 				continue;
 			}
-			AdvanceStatus stat;
+			Entity playerRet;
+			msg = "";
 			switch (cmd.charAt(0)) {
 			case 'w':
-				stat = Game.player.advance(Direction.UP);
+				playerRet = player.advance(Direction.UP);
 				break;
 			case 's':
-				stat = Game.player.advance(Direction.DOWN);
+				playerRet = player.advance(Direction.DOWN);
 				break;
 			case 'a':
-				stat = Game.player.advance(Direction.LEFT);
+				playerRet = player.advance(Direction.LEFT);
 				break;
 			case 'd':
-				stat = Game.player.advance(Direction.RIGHT);
+				playerRet = player.advance(Direction.RIGHT);
+				break;
+			case 'p':
+				Item item = player.room.items[player.y][player.x];
+				if (item == null) {
+					msg = "Nothing there.\n";
+					continue;
+				}
+				msg = "Picked up a " + item.type.name + '\n';
+				player.inv.add(item);
+				player.room.items[player.y][player.x] = null;
+				playerRet = player;
 				break;
 			case 'i':
-				msg = "Type a character and press enter\nw: move/attack right\ns: move/attack down\na: move/attack left\nd: move/attack right\ne: use item\n";
+				msg = "w: move/attack right\ns: move/attack down\na: move/attack left\nd: move/attack right\ne: use item\np: pickup item\ni: help\n";
 				continue;
 			default:
 				msg = "Invalid instruction. Press i and enter for help.\n";
 				continue;
 			}
-			switch (stat) {
-			case BLOCKED:
+			if (playerRet == null) {
 				msg = "Can't move there.\n";
 				continue;
-			case ATTACKED:
-				msg = "Attacked.\n";
-				break;
-			case MOVED:
-				msg = "";
-				break;
+			} else if (playerRet instanceof Monster) {
+				msg = "Hit " + playerRet.type.name + " for " + player.type.atk + " HP.\n";
 			}
-			room.tick();
-			msg += Game.player.getHP() + " HP remaining.";
+			int dmg = room.tick();
+			if (dmg > 0) {
+				msg += "You were hit for " + dmg + " HP (" + player.hp + " remaining).";
+			}
 		}
 	}
 }
